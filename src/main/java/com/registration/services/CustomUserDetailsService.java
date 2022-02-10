@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,6 @@ public class CustomUserDetailsService implements UserDetailsService{
     {
 
         Registration registration =  registrationRepository.getById(username);
-        System.out.println("user details"+registration.getPassword());
             return new User(username,registration.getPassword(),new ArrayList<>());
     }
 
@@ -38,7 +38,9 @@ public class CustomUserDetailsService implements UserDetailsService{
 
     public List<Registration> getAllUser()
     {
-        return registrationRepository.findAll();
+        List<Registration> regi=registrationRepository.findAll();
+
+        return regi;
     }
 
     /**
@@ -47,11 +49,21 @@ public class CustomUserDetailsService implements UserDetailsService{
      *
      */
 
-    public String addUser(Registration registration)
+    public Registration addUser(Registration registration)
     {
-        Registration reg=registrationRepository.save(registration);
-        System.out.println("the success message "+reg);
-        return "new user";
+        Registration reg=null;
+        if(registrationRepository.existsById(registration.getEmail()))
+        {
+            System.out.println("this email is already exist");
+        }else{
+            try{
+                reg=registrationRepository.save(registration);
+            }catch(Exception e)
+            {
+                System.out.println("this mobile number already exist");
+            }
+        }
+        return reg;
     }
 
     /**
@@ -62,18 +74,39 @@ public class CustomUserDetailsService implements UserDetailsService{
 
     public Registration getUser(String email)
     {
-        Registration student=null;
         List<Registration> users=registrationRepository.findAll();
-        for (Registration user : users) {
+        int result=0;
+        for (Registration user : users)
+        {
             if (user.getEmail().equals(email)) {
-                student = user;
-                break;
-            }else{
-                throw new UsernameNotFoundException("User not found!");
+                user.setFirstname(user.getFirstname());
+                user.setLastname(user.getLastname());
+                user.setEmail(user.getEmail());
+                user.setMobile(user.getMobile());
+                user.setPassword(user.getPassword());
+                result=1;
+                return user;
             }
         }
-        return student;
+        if(result==0){
+        throw new UsernameNotFoundException("user not found!!!");
+        }
+        return null;
     }
 
 
+    public Registration update(String email,Registration registration)
+    {
+        System.out.println("update");
+        System.out.println(email);
+        System.out.println(registration);
+       if(registrationRepository.existsById(email)!=true)
+       {
+          throw new UsernameNotFoundException("user does not exist ");
+       }else{
+           System.out.println(registrationRepository.save(registration));
+          return registrationRepository.save(registration);
+       }
+
+    }
 }
