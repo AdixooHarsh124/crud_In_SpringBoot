@@ -2,6 +2,7 @@ package com.registration.services;
 
 import com.registration.Entities.Registration;
 import com.registration.Repository.RegistrationRepository;
+import com.sun.istack.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -49,18 +50,21 @@ public class CustomUserDetailsService implements UserDetailsService{
      *
      */
 
-    public Registration addUser(Registration registration)
+    public Registration addUser(Registration registration) throws Exception
     {
         Registration reg=null;
-        if(registrationRepository.existsById(registration.getEmail()))
+        if(registration.getFirstname().length()<=2){
+            throw new Exception("User with name "+registration.getFirstname()+" is too short");
+        }else if(registrationRepository.existsById(registration.getEmail()))
         {
-            System.out.println("this email is already exist");
-        }else{
+            throw new Exception("User with "+registration.getEmail()+" is already exist");
+        }else {
             try{
                 reg=registrationRepository.save(registration);
             }catch(Exception e)
             {
-                System.out.println("this mobile number already exist");
+                e.printStackTrace();
+//                throw new Exception("this mobile number is"+registration.getMobile()+" already exist");
             }
         }
         return reg;

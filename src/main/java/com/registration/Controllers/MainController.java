@@ -34,8 +34,7 @@ public class MainController {
 
 
     @PostMapping("/register")
-    public Registration register(@RequestBody Registration registration)
-    {
+    public Registration register(@RequestBody Registration registration) throws Exception {
         Registration reg;
         String emailRegex = "^(.+)@(.+)$";
 //        String regex="^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$";
@@ -59,8 +58,7 @@ public class MainController {
             reg=customUserDetailsService.addUser(registration);
             return reg;
         }else {
-            System.out.println("else");
-            throw new UsernameNotFoundException("user credential wrong");
+            throw new UsernameNotFoundException("user enter wrong format values");
         }
 
 
@@ -91,9 +89,30 @@ public class MainController {
     public Registration updateUser(@PathVariable("email") String email,@RequestBody Registration registration)
     {
         Registration reg;
+        String emailRegex = "^(.+)@(.+)$";
+//        String regex="^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(registration.getEmail());
+        System.out.println("email "+matcher.matches());
+
+
+        String passwordValidation="^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$";
+        Pattern patternn = Pattern.compile(passwordValidation);
+        Matcher matcherr = patternn.matcher(registration.getPassword());
+        System.out.println("password "+matcherr.matches());
+
+
+        String mobileValidation="[6789][0-9]{9}";
+        Pattern patternnn = Pattern.compile(mobileValidation);
+        Matcher matcherrr = patternnn.matcher(registration.getMobile());
+        System.out.println("mobile "+matcherrr.matches());
+        if(matcher.matches()==true && matcherr.matches()==true && matcherrr.matches()==true){
         registration.setPassword(this.bCryptPasswordEncoder.encode(registration.getPassword()));
         reg=customUserDetailsService.update(email, registration);
         return reg;
+        }else {
+            throw new UsernameNotFoundException("user enter wrong format values");
+        }
     }
 
 
